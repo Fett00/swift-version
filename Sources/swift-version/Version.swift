@@ -82,15 +82,58 @@ public struct Version: ExpressibleByStringLiteral {
 }
 
 extension Version: Comparable {
-
+    
     public static func < (lhs: Version, rhs: Version) -> Bool {
-        lhs.major < rhs.major && lhs.minor < rhs.minor && lhs.patch < rhs.patch
-        // TODO: add metadata and prerelease to comparsion
+        lhs.major < rhs.major
+        || lhs.minor < rhs.minor
+        || lhs.patch < rhs.patch
+        || comparePrereleases(
+            lhs: lhs.prereleaseIdentifiers,
+            rhs: rhs.prereleaseIdentifiers
+        )
     }
 
     public static func ==(lhs: Version, rhs: Version) -> Bool {
-        lhs.major == rhs.major && lhs.minor == rhs.minor && lhs.patch == rhs.patch
-        // TODO: add metadata and prerelease to equation
+        lhs.major == rhs.major
+        && lhs.minor == rhs.minor
+        && lhs.patch == rhs.patch
+        && equalPrereleases(
+            lhs: lhs.prereleaseIdentifiers,
+            rhs: rhs.prereleaseIdentifiers
+        )
+    }
+
+    private static func comparePrereleases(lhs: [String], rhs: [String]) -> Bool {
+        if lhs.count != rhs.count {
+            if lhs.count == 0 {
+                return false
+            } else if rhs.count == 0 {
+                return true
+            }
+            return lhs.count < rhs.count
+        }
+        for (lhsItem, rhsItem) in zip(lhs, rhs) {
+            if let lhsDigit = UInt(lhsItem), let rhsDigit = UInt(rhsItem) {
+                if lhsDigit < rhsDigit {
+                    return true
+                }
+            } else {
+                if lhsItem < rhsItem {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private static func equalPrereleases(lhs: [String], rhs: [String]) -> Bool {
+        zip(lhs, rhs).allSatisfy {
+            if let lhsDigit = UInt($0), let rhsDigit = UInt($1) {
+                return lhsDigit == rhsDigit
+            } else {
+                return $0 == $1
+            }
+        }
     }
 }
 
