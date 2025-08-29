@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import swift_version
+@testable import Version
 
 @Test func majorOnlyTest() async throws {
     let version = Version(stringLiteral: "10")

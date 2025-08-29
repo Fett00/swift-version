@@ -1,6 +1,21 @@
-/// Describe version of something
+/// Representation of a version following the Semantic Versioning 2.0.0 specification.
 ///
-/// Applyed Semantic Versioning 2.0.0
+/// `Version` encapsulates the following components:
+/// - `major` — major version (incompatible API changes)
+/// - `minor` — minor version (new functionality in a backward-compatible manner)
+/// - `patch` — patch version (backward-compatible bug fixes)
+/// - `prerelease` — pre-release identifier (e.g. `alpha`, `beta`, `rc`)
+/// - `buildMetadata` — build metadata (e.g. commit hash or build number)
+///
+///
+/// Example:
+/// ```swift
+/// let version: Version = Version(major: 5, minor: 15, patch: 35, prereleaseIdentifiers: ["alpha"], metadataIdentifiers: ["001"])
+/// print(version) // "5.15.35-alpha+001
+///
+/// let version: Version = "1.11.31"
+/// print(version) // "1.11.31"
+/// ```
 public struct Version: ExpressibleByStringLiteral {
 
     /// The major version according to the semantic versioning standard.
@@ -18,8 +33,8 @@ public struct Version: ExpressibleByStringLiteral {
 
     public var stringRepresentation: String {
         "\(major).\(minor).\(patch)"
-        + (prereleaseIdentifiers.isEmpty ? "" : "\(prereleaseIdentifiers)")
-        + (metadataIdentifiers.isEmpty ? "" : "\(metadataIdentifiers)")
+        + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
+        + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
     }
 
     public init(stringLiteral value: StringLiteralType) {
@@ -103,6 +118,15 @@ extension Version: Comparable {
         )
     }
 
+    /// Compare prereleases part
+    ///
+    /// **Comparison rules:**
+    ///
+    /// Precedence for two pre-release versions MUST be determined by comparing each dot separated identifier from left to right until a difference is found as follows:
+    /// 1. Identifiers consisting of only digits are compared numerically.
+    /// 2. Identifiers with letters or hyphens are compared lexically in ASCII sort order.
+    /// 3. Numeric identifiers always have lower precedence than non-numeric identifiers.
+    /// 4. A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.
     private static func comparePrereleases(lhs: [String], rhs: [String]) -> Bool {
         if lhs.count != rhs.count {
             if lhs.count == 0 {
@@ -127,17 +151,15 @@ extension Version: Comparable {
     }
 
     private static func equalPrereleases(lhs: [String], rhs: [String]) -> Bool {
-        zip(lhs, rhs).allSatisfy {
-            if let lhsDigit = UInt($0), let rhsDigit = UInt($1) {
-                return lhsDigit == rhsDigit
-            } else {
-                return $0 == $1
-            }
+        if lhs.count != rhs.count {
+            return false
         }
+        return lhs.elementsEqual(rhs)
     }
 }
 
 extension Version: CustomStringConvertible, CustomDebugStringConvertible {
+
     public var description: String {
         stringRepresentation
     }
