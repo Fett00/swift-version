@@ -130,3 +130,9 @@ import Foundation
     version2 = Version(stringLiteral: "10.1.5-alpha.1")
     #expect(version1 == version2)
 }
+
+@Test func noValidInit() async throws {
+    let version: Version = "Hello"
+    #expect(version == Version(stringLiteral: "0.0.0"))
+}
+
