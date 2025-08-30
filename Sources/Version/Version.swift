@@ -4,14 +4,13 @@
 /// - `major` — major version (incompatible API changes)
 /// - `minor` — minor version (new functionality in a backward-compatible manner)
 /// - `patch` — patch version (backward-compatible bug fixes)
-/// - `prerelease` — pre-release identifier (e.g. `alpha`, `beta`, `rc`)
-/// - `buildMetadata` — build metadata (e.g. commit hash or build number)
-///
+/// - `prereleaseIdentifiers` — array of pre-release identifiers (e.g. `["alpha", "1"]`)
+/// - `metadataIdentifiers` — array of build metadata identifiers (e.g. `["001", "sha.5114f85"]`)
 ///
 /// Example:
 /// ```swift
-/// let version: Version = Version(major: 5, minor: 15, patch: 35, prereleaseIdentifiers: ["alpha"], metadataIdentifiers: ["001"])
-/// print(version) // "5.15.35-alpha+001
+/// let version = Version(major: 5, minor: 15, patch: 35, prereleaseIdentifiers: ["alpha"], metadataIdentifiers: ["001"])
+/// print(version) // "5.15.35-alpha+001"
 ///
 /// let version: Version = "1.11.31"
 /// print(version) // "1.11.31"
@@ -20,23 +19,41 @@ public struct Version: ExpressibleByStringLiteral {
 
     /// The major version according to the semantic versioning standard.
     public let major: UInt
+
     /// The minor version according to the semantic versioning standard.
     public let minor: UInt
+
     /// The patch version according to the semantic versioning standard.
     public let patch: UInt
-    /// The pre-release identifier according to the semantic versioning standard, starting with appending a hyphen and a series of dot separated identifiers
-    /// Examples: 1.0.0-alpha, 1.0.0-alpha.1, 1.0.0-0.3.7, 1.0.0-x.7.z.92, 1.0.0-x-y-z.--.
+
+    /// The pre-release identifiers (e.g. `["alpha"]`, `["beta", "1"]`).
+    ///
+    /// Examples:
+    /// - `1.0.0-alpha` → `["alpha"]`
+    /// - `1.0.0-alpha.1` → `["alpha", "1"]`
     public let prereleaseIdentifiers: [String]
-    /// The build metadata of this version according to the semantic versioning standard, starting with appending a plus sign and a series of dot separated identifiers
-    /// Examples: 1.0.0-alpha+001, 1.0.0+20130313144700, 1.0.0-beta+exp.sha.5114f85, 1.0.0+21AF26D3----117B344092BD.
+
+    /// The build metadata identifiers (e.g. `["001"]`, `["exp", "sha.5114f85"]`).
+    ///
+    /// Examples:
+    /// - `1.0.0+20130313144700` → `["20130313144700"]`
+    /// - `1.0.0-beta+exp.sha.5114f85` → `["exp", "sha.5114f85"]`
     public let metadataIdentifiers: [String]
 
+    /// Returns the normalized string representation of the version.
+    /// Example: `"1.2.3-beta+001"`
     public var stringRepresentation: String {
         "\(major).\(minor).\(patch)"
         + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
         + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
     }
 
+    /// Creates a `Version` instance from a string literal.
+    ///
+    /// Example:
+    /// ```swift
+    /// let v: Version = "1.2.3-beta+exp.sha.5114f85"
+    /// ```
     public init(stringLiteral value: StringLiteralType) {
 
         var editableValue = value
@@ -81,6 +98,7 @@ public struct Version: ExpressibleByStringLiteral {
         }
     }
 
+    /// Creates a `Version` instance from explicit components.
     public init(
         major: UInt,
         minor: UInt,
