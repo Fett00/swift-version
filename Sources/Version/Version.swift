@@ -237,3 +237,7 @@ extension Version: Codable {
         try container.encode(stringRepresentation)
     }
 }
+
+#if swift(>=5.5)
+extension Version: Sendable {}
+#endif
