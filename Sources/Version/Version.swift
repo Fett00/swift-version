@@ -15,7 +15,7 @@
 /// let version: Version = "1.11.31"
 /// print(version) // "1.11.31"
 /// ```
-public struct Version: ExpressibleByStringLiteral {
+public struct Version {
 
     /// The major version according to the semantic versioning standard.
     public let major: UInt
@@ -48,56 +48,6 @@ public struct Version: ExpressibleByStringLiteral {
         + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
     }
 
-    /// Creates a `Version` instance from a string literal.
-    ///
-    /// Example:
-    /// ```swift
-    /// let v: Version = "1.2.3-beta+exp.sha.5114f85"
-    /// ```
-    public init(stringLiteral value: StringLiteralType) {
-
-        var editableValue = value
-
-        let beforePrereleaseIndex = value.firstIndex(of: "-")
-        let beforeMetadataIndex = value.firstIndex(of: "+")
-
-        if let beforeMetadataIndex {
-            let metadataIndex = editableValue.index(after: beforeMetadataIndex)
-            let metadataRange = metadataIndex ..< editableValue.endIndex
-            self.metadataIdentifiers = editableValue[metadataRange]
-                .split(separator: ".")
-                .compactMap({ String($0) })
-            editableValue
-                .removeSubrange(beforeMetadataIndex..<editableValue.endIndex) // replace. removing is too expansive
-        } else {
-            self.metadataIdentifiers = []
-        }
-
-        if let beforePrereleaseIndex {
-            let prereleaseIndex = editableValue.index(after: beforePrereleaseIndex)
-            let prereleaseRange = prereleaseIndex ..< editableValue.endIndex
-            self.prereleaseIdentifiers = editableValue[prereleaseRange]
-                .split(separator: ".")
-                .compactMap({ String($0) })
-            editableValue
-                .removeSubrange(beforePrereleaseIndex..<editableValue.endIndex) // replace. removing is too expansive
-        } else {
-            self.prereleaseIdentifiers = []
-        }
-
-        let numbers = editableValue.split(separator: ".").compactMap({ UInt($0) })
-        switch numbers.count {
-        case 1:
-            (major, minor, patch) = (numbers[0], 0, 0)
-        case 2:
-            (major, minor, patch) = (numbers[0], numbers[1], 0)
-        case 3:
-            (major, minor, patch) = (numbers[0], numbers[1], numbers[2])
-        default:
-            (major, minor, patch) = (0, 0, 0)
-        }
-    }
-
     /// Creates a `Version` instance from explicit components.
     public init(
         major: UInt,
@@ -111,6 +61,91 @@ public struct Version: ExpressibleByStringLiteral {
         self.patch = patch
         self.prereleaseIdentifiers = prereleaseIdentifiers
         self.metadataIdentifiers = metadataIdentifiers
+    }
+}
+
+extension Version: ExpressibleByStringLiteral {
+
+    /// Creates a `Version` instance from a string literal.
+    ///
+    /// Example:
+    /// ```swift
+    /// let v: Version = "1.2.3-beta+exp.sha.5114f85"
+    /// ```
+    public init(stringLiteral value: StringLiteralType) {
+
+        let prereleaseStart = value.firstIndex(of: "-")
+        let metadataStart = value.firstIndex(of: "+")
+
+        let endOfMainPart = prereleaseStart ?? metadataStart ?? value.endIndex
+        let mainPart = value[..<endOfMainPart]
+
+        if let metadataStart {
+            let metadataIndex = value.index(after: metadataStart)
+            self.metadataIdentifiers = value[metadataIndex...]
+                .split(separator: ".")
+                .map(String.init)
+        } else {
+            self.metadataIdentifiers = []
+        }
+
+        if let prereleaseStart {
+            let prereleaseEnd = metadataStart ?? value.endIndex
+            let prereleaseIndex = value.index(after: prereleaseStart)
+            self.prereleaseIdentifiers = value[prereleaseIndex..<prereleaseEnd]
+                .split(separator: ".")
+                .map(String.init)
+        } else {
+            self.prereleaseIdentifiers = []
+        }
+
+        let numbers = mainPart.split(separator: ".").compactMap({ UInt($0) })
+        switch numbers.count {
+        case 1: (major, minor, patch) = (numbers[0], 0, 0)
+        case 2: (major, minor, patch) = (numbers[0], numbers[1], 0)
+        case 3: (major, minor, patch) = (numbers[0], numbers[1], numbers[2])
+        default: (major, minor, patch) = (0, 0, 0)
+        }
+    }
+}
+
+extension Version: LosslessStringConvertible {
+    public init?(_ description: String) {
+
+        guard !description.isEmpty else { return nil }
+
+        let prereleaseStart = description.firstIndex(of: "-")
+        let metadataStart = description.firstIndex(of: "+")
+
+        let endOfMainPart = prereleaseStart ?? metadataStart ?? description.endIndex
+        let mainPart = description[..<endOfMainPart]
+
+        if let metadataStart {
+            let metadataIndex = description.index(after: metadataStart)
+            self.metadataIdentifiers = description[metadataIndex...]
+                .split(separator: ".")
+                .map(String.init)
+        } else {
+            self.metadataIdentifiers = []
+        }
+
+        if let prereleaseStart {
+            let prereleaseEnd = metadataStart ?? description.endIndex
+            let prereleaseIndex = description.index(after: prereleaseStart)
+            self.prereleaseIdentifiers = description[prereleaseIndex..<prereleaseEnd]
+                .split(separator: ".")
+                .map(String.init)
+        } else {
+            self.prereleaseIdentifiers = []
+        }
+
+        let numbers = mainPart.split(separator: ".").compactMap({ UInt($0) })
+        switch numbers.count {
+        case 1: (major, minor, patch) = (numbers[0], 0, 0)
+        case 2: (major, minor, patch) = (numbers[0], numbers[1], 0)
+        case 3: (major, minor, patch) = (numbers[0], numbers[1], numbers[2])
+        default: return nil
+        }
     }
 }
 
