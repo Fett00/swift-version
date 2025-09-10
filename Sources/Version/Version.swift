@@ -76,9 +76,11 @@ extension Version: ExpressibleByStringLiteral {
 
         let prereleaseStart = value.firstIndex(of: "-")
         let metadataStart = value.firstIndex(of: "+")
+        let startWithV = value.hasPrefix("v")
 
+        let startOfMainPart = startWithV ? value.index(value.startIndex, offsetBy: 1) : value.startIndex
         let endOfMainPart = prereleaseStart ?? metadataStart ?? value.endIndex
-        let mainPart = value[..<endOfMainPart]
+        let mainPart = value[startOfMainPart..<endOfMainPart]
 
         if let metadataStart {
             let metadataIndex = value.index(after: metadataStart)
@@ -116,9 +118,11 @@ extension Version: LosslessStringConvertible {
 
         let prereleaseStart = description.firstIndex(of: "-")
         let metadataStart = description.firstIndex(of: "+")
+        let startWithV = description.hasPrefix("v")
 
+        let startOfMainPart = startWithV ? description.index(description.startIndex, offsetBy: 1) : description.startIndex
         let endOfMainPart = prereleaseStart ?? metadataStart ?? description.endIndex
-        let mainPart = description[..<endOfMainPart]
+        let mainPart = description[startOfMainPart..<endOfMainPart]
 
         if let metadataStart {
             let metadataIndex = description.index(after: metadataStart)
