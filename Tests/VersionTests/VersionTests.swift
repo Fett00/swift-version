@@ -11,6 +11,11 @@ import Foundation
     #expect(Version(stringLiteral: "10.1.5").description == "10.1.5")
     #expect(Version(stringLiteral: "10.1.5-alpha.1").description == "10.1.5-alpha.1")
     #expect(Version(stringLiteral: "10.1.5-alpha.1+m1").description == "10.1.5-alpha.1+m1")
+
+    #expect(Version(stringLiteral: "v0.1.5").description == "0.1.5")
+    #expect(Version(stringLiteral: "v10.1.5").description == "10.1.5")
+    #expect(Version(stringLiteral: "v10.1.5-alpha.1").description == "10.1.5-alpha.1")
+    #expect(Version(stringLiteral: "v10.1.5-alpha.1+m1").description == "10.1.5-alpha.1+m1")
 }
 
 @Test func encodeToJsonTest() async throws {
