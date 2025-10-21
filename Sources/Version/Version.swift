@@ -275,4 +275,31 @@ extension Version {
     func hasBreakingChanges(_ other: Version) -> Bool {
         !isCompatible(other)
     }
+
+    /// Computes the semantic difference between this version and another version.
+    ///
+    /// This method returns a new `Version` whose components represent the absolute
+    /// differences between corresponding components of the two versions:
+    /// - `major`, `minor`, and `patch` are the absolute numeric differences of the respective
+    ///   components.
+    /// - `prereleaseIdentifiers` and `metadataIdentifiers` are the symmetric differences of the
+    ///   two versions’ identifier arrays (i.e., identifiers present in exactly one of the versions).
+    ///
+    /// Notes:
+    /// - The returned version is not intended to be a valid semantic version for distribution;
+    ///   it is a structural “diff” useful for inspection, comparison, or reporting.
+    /// - Symmetric difference of identifiers does not preserve ordering and removes duplicates,
+    ///   since it is computed via sets.
+    ///
+    /// - Parameter other: The version to compare against this version.
+    /// - Returns: A `Version` whose fields describe how the two versions differ.
+    func diff(_ other: Version) -> Version {
+        Version(
+            major: UInt(abs(Int(self.major) - Int(other.major))),
+            minor: UInt(abs(Int(self.minor) - Int(other.minor))),
+            patch: UInt(abs(Int(self.patch) - Int(other.patch))),
+            prereleaseIdentifiers: Array(Set(self.prereleaseIdentifiers).symmetricDifference(other.prereleaseIdentifiers)),
+            metadataIdentifiers: Array(Set(self.metadataIdentifiers).symmetricDifference(other.metadataIdentifiers))
+        )
+    }
 }
