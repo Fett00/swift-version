@@ -245,3 +245,21 @@ extension Version: Codable {
 #if swift(>=5.5)
 extension Version: Sendable {}
 #endif
+
+#if canImport(Foundation)
+import Foundation
+
+extension Bundle {
+    var version: Version? {
+        guard let bundleVersion = infoDictionary?["CFBundleShortVersionString"] as? String else { return nil }
+        return Version(bundleVersion)
+    }
+
+    var minimalSystemVersion: Version? {
+        guard let minimalSystemVersionString = infoDictionary?["CFBundleMinimumOSVersion"] as? String else {
+            return nil
+        }
+        return Version(minimalSystemVersionString)
+    }
+}
+#endif
