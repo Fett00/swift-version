@@ -64,6 +64,7 @@ public struct Version {
     }
 }
 
+// MARK: - ExpressibleByStringLiteral
 extension Version: ExpressibleByStringLiteral {
 
     /// Creates a `Version` instance from a string literal.
@@ -111,6 +112,7 @@ extension Version: ExpressibleByStringLiteral {
     }
 }
 
+// MARK: - LosslessStringConvertible
 extension Version: LosslessStringConvertible {
     public init?(_ description: String) {
 
@@ -153,6 +155,7 @@ extension Version: LosslessStringConvertible {
     }
 }
 
+// MARK: - Comparable
 extension Version: Comparable {
     
     public static func < (lhs: Version, rhs: Version) -> Bool {
@@ -215,6 +218,7 @@ extension Version: Comparable {
     }
 }
 
+// MARK: - CustomStringConvertible
 extension Version: CustomStringConvertible, CustomDebugStringConvertible {
 
     public var description: String {
@@ -228,6 +232,7 @@ extension Version: CustomStringConvertible, CustomDebugStringConvertible {
     }
 }
 
+// MARK: - Codable
 extension Version: Codable {
 
     public init(from decoder: any Decoder) throws {
@@ -242,6 +247,7 @@ extension Version: Codable {
     }
 }
 
+// MARK: - Sendable
 #if swift(>=5.5)
 extension Version: Sendable {}
 #endif
@@ -249,6 +255,7 @@ extension Version: Sendable {}
 #if canImport(Foundation)
 import Foundation
 
+// MARK: - Bundle
 extension Bundle {
     var version: Version? {
         guard let bundleVersion = infoDictionary?["CFBundleShortVersionString"] as? String else { return nil }
@@ -263,3 +270,55 @@ extension Bundle {
     }
 }
 #endif
+
+// MARK: - Semantic Comparison Utilities
+extension Version {
+
+    /// Determines whether this version is semantically compatible with another version.
+    ///
+    /// According to semantic versioning, two versions are considered compatible if they share the same major version number.
+    /// This means that there are no breaking API changes between them, and minor or patch differences are backward compatible.
+    ///
+    /// - Parameter other: The version to compare with this version.
+    /// - Returns: `true` if both versions have the same major version; otherwise, `false`.
+    func isCompatible(_ other: Version) -> Bool {
+        self.major == other.major
+    }
+
+    /// Determines whether this version introduces breaking changes compared to another version.
+    ///
+    /// According to semantic versioning, a breaking change typically corresponds to a change in the major version number.
+    ///
+    /// - Parameter other: The version to compare against.
+    /// - Returns: `true` if the major versions differ and thus represent a breaking change; otherwise, `false`.
+    func hasBreakingChanges(_ other: Version) -> Bool {
+        !isCompatible(other)
+    }
+
+    /// Computes the semantic difference between this version and another version.
+    ///
+    /// This method returns a new `Version` whose components represent the absolute
+    /// differences between corresponding components of the two versions:
+    /// - `major`, `minor`, and `patch` are the absolute numeric differences of the respective
+    ///   components.
+    /// - `prereleaseIdentifiers` and `metadataIdentifiers` are the symmetric differences of the
+    ///   two versions’ identifier arrays (i.e., identifiers present in exactly one of the versions).
+    ///
+    /// Notes:
+    /// - The returned version is not intended to be a valid semantic version for distribution;
+    ///   it is a structural “diff” useful for inspection, comparison, or reporting.
+    /// - Symmetric difference of identifiers does not preserve ordering and removes duplicates,
+    ///   since it is computed via sets.
+    ///
+    /// - Parameter other: The version to compare against this version.
+    /// - Returns: A `Version` whose fields describe how the two versions differ.
+    func diff(_ other: Version) -> Version {
+        Version(
+            major: UInt(abs(Int(self.major) - Int(other.major))),
+            minor: UInt(abs(Int(self.minor) - Int(other.minor))),
+            patch: UInt(abs(Int(self.patch) - Int(other.patch))),
+            prereleaseIdentifiers: Array(Set(self.prereleaseIdentifiers).symmetricDifference(other.prereleaseIdentifiers)),
+            metadataIdentifiers: Array(Set(self.metadataIdentifiers).symmetricDifference(other.metadataIdentifiers))
+        )
+    }
+}
