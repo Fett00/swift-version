@@ -159,7 +159,7 @@ v += .minor
 print(v) // "1.3.0"
 ```
 
-### Semantic Comparison Utilities
+### Semantic Comparison Utilities ✅
 
 Convenient methods to check compatibility or breaking changes:
 
