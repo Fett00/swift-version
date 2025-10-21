@@ -252,6 +252,25 @@ extension Version: Codable {
 extension Version: Sendable {}
 #endif
 
+#if canImport(Foundation)
+import Foundation
+
+// MARK: - Bundle
+extension Bundle {
+    var version: Version? {
+        guard let bundleVersion = infoDictionary?["CFBundleShortVersionString"] as? String else { return nil }
+        return Version(bundleVersion)
+    }
+
+    var minimalSystemVersion: Version? {
+        guard let minimalSystemVersionString = infoDictionary?["CFBundleMinimumOSVersion"] as? String else {
+            return nil
+        }
+        return Version(minimalSystemVersionString)
+    }
+}
+#endif
+
 // MARK: - Semantic Comparison Utilities
 extension Version {
 

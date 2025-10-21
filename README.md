@@ -193,7 +193,7 @@ version.formatted(pretty: true) // "v1.2.3-beta+001"
 version.short                   // "1.2.3"
 ```
 
-### Environment & System Extensions
+### Environment & System Extensions ✅
 
 Convenient helpers to get app and system versions directly
 
