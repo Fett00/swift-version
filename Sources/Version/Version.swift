@@ -257,12 +257,12 @@ import Foundation
 
 // MARK: - Bundle
 extension Bundle {
-    var version: Version? {
+    public var version: Version? {
         guard let bundleVersion = infoDictionary?["CFBundleShortVersionString"] as? String else { return nil }
         return Version(bundleVersion)
     }
 
-    var minimalSystemVersion: Version? {
+    public var minimalSystemVersion: Version? {
         guard let minimalSystemVersionString = infoDictionary?["CFBundleMinimumOSVersion"] as? String else {
             return nil
         }
@@ -281,7 +281,7 @@ extension Version {
     ///
     /// - Parameter other: The version to compare with this version.
     /// - Returns: `true` if both versions have the same major version; otherwise, `false`.
-    func isCompatible(_ other: Version) -> Bool {
+    public func isCompatible(_ other: Version) -> Bool {
         self.major == other.major
     }
 
@@ -291,7 +291,7 @@ extension Version {
     ///
     /// - Parameter other: The version to compare against.
     /// - Returns: `true` if the major versions differ and thus represent a breaking change; otherwise, `false`.
-    func hasBreakingChanges(_ other: Version) -> Bool {
+    public func hasBreakingChanges(_ other: Version) -> Bool {
         !isCompatible(other)
     }
 
@@ -312,7 +312,7 @@ extension Version {
     ///
     /// - Parameter other: The version to compare against this version.
     /// - Returns: A `Version` whose fields describe how the two versions differ.
-    func diff(_ other: Version) -> Version {
+    public func diff(_ other: Version) -> Version {
         Version(
             major: UInt(abs(Int(self.major) - Int(other.major))),
             minor: UInt(abs(Int(self.minor) - Int(other.minor))),
