@@ -43,15 +43,21 @@ import Foundation
 }
 
 @Test func compareTwoVersionsTest() async throws {
-
     #expect(Version(stringLiteral: "9.0.0") > Version(stringLiteral: "8.0.0"))
     #expect(Version(stringLiteral: "9.1.0") > Version(stringLiteral: "9.0.0"))
     #expect(Version(stringLiteral: "9.1.1") > Version(stringLiteral: "9.1.0"))
     #expect(Version(stringLiteral: "9.10.5") > Version(stringLiteral: "9.5.10"))
     #expect(Version(stringLiteral: "10.1.5-beta") > Version(stringLiteral: "10.1.5-alpha"))
-    #expect(Version(stringLiteral: "10.1.5-1.alpha") > Version(stringLiteral: "10.1.5-alpha"))
     #expect(Version(stringLiteral: "1.0.0") > Version(stringLiteral: "1.0.0-alpha"))
     #expect(Version(stringLiteral: "10.1.5-alpha.1") > Version(stringLiteral: "10.1.5-alpha"))
+
+    #expect(Version(stringLiteral: "1.0.0-alpha") < Version(stringLiteral: "1.0.0-alpha.1"))
+    #expect(Version(stringLiteral: "1.0.0-alpha.1") < Version(stringLiteral: "1.0.0-alpha.beta"))
+    #expect(Version(stringLiteral: "1.0.0-alpha.beta") < Version(stringLiteral: "1.0.0-beta"))
+    #expect(Version(stringLiteral: "1.0.0-beta") < Version(stringLiteral: "1.0.0-beta.2"))
+    #expect(Version(stringLiteral: "1.0.0-beta.2") < Version(stringLiteral: "1.0.0-beta.11"))
+    #expect(Version(stringLiteral: "1.0.0-beta.11") < Version(stringLiteral: "1.0.0-rc.1"))
+    #expect(Version(stringLiteral: "1.0.0-rc.1") < Version(stringLiteral: "1.0.0"))
 }
 
 @Test func equationTwoVersionsTest() async throws {
