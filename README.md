@@ -149,16 +149,6 @@ let range = VersionRange("1.0.0"..<"2.0.0")
 range.contains("1.5.3") // true
 ```
 
-### Operator Overloads
-
-Easily bump versions:
-
-```swift
-var v: Version = "1.2.3"
-v += .minor
-print(v) // "1.3.0"
-```
-
 ### Semantic Comparison Utilities ✅
 
 Convenient methods to check compatibility or breaking changes:
@@ -174,15 +164,6 @@ Support for more flexible version formats:
 
 * `"v1.2.3"`
 * `"1.2.3-rc.1+build.456"`
-
-### Pre-release & Metadata Helpers
-
-Add or modify pre-release and build metadata:
-
-```swift
-v.addPrerelease("beta.1")
-v.addMetadata("exp.sha.5114f85")
-```
 
 ### Pretty Printing / Version Formatting ✅
 
