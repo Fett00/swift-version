@@ -188,26 +188,28 @@ extension Version: Comparable {
     /// 3. Numeric identifiers always have lower precedence than non-numeric identifiers.
     /// 4. A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal.
     private static func comparePrereleases(lhs: [String], rhs: [String]) -> Bool {
-        if lhs.count != rhs.count {
-            if lhs.count == 0 {
-                return false
-            } else if rhs.count == 0 {
-                return true
-            }
-            return lhs.count < rhs.count
-        }
+        // normal version > prerelease
+        if lhs.isEmpty && !rhs.isEmpty { return false }
+        if !lhs.isEmpty && rhs.isEmpty { return true }
+
         for (lhsItem, rhsItem) in zip(lhs, rhs) {
-            if let lhsDigit = UInt(lhsItem), let rhsDigit = UInt(rhsItem) {
-                if lhsDigit < rhsDigit {
-                    return true
-                }
+            let lhsNum = UInt(lhsItem)
+            let rhsNum = UInt(rhsItem)
+
+            if let l = lhsNum, let r = rhsNum {
+                if l != r { return l < r }
+            } else if lhsNum != nil {
+                // numeric < alphanumeric
+                return true
+            } else if rhsNum != nil {
+                return false
             } else {
-                if lhsItem < rhsItem {
-                    return true
-                }
+                if lhsItem != rhsItem { return lhsItem < rhsItem }
             }
         }
-        return false
+
+        // if all equal so far → shorter set has lower priority
+        return lhs.count < rhs.count
     }
 
     private static func equalPrereleases(lhs: [String], rhs: [String]) -> Bool {
