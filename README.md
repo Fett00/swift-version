@@ -184,7 +184,7 @@ v.addPrerelease("beta.1")
 v.addMetadata("exp.sha.5114f85")
 ```
 
-### Pretty Printing / Version Formatting
+### Pretty Printing / Version Formatting ✅
 
 Flexible formatting for logs or UI:
 

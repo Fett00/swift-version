@@ -1,18 +1,3 @@
-// MARK: - CustomStringConvertible
-
-extension Version: CustomStringConvertible, CustomDebugStringConvertible {
-
-    public var description: String {
-        stringRepresentation
-    }
-
-    public var debugDescription: String {
-        "Version: major \(major), minor \(minor), patch \(patch)"
-        + (prereleaseIdentifiers.isEmpty ? "" : ", preReleaseIdentifiers: \(prereleaseIdentifiers)")
-        + (metadataIdentifiers.isEmpty ? "" : ", metadataIdentifiers: \(metadataIdentifiers)")
-    }
-}
-
 // MARK: - LosslessStringConvertible
 
 extension Version: LosslessStringConvertible {
@@ -106,13 +91,76 @@ extension Version: ExpressibleByStringLiteral {
     }
 }
 
-// MARK: - Other strings extionsions
+// MARK: - CustomStringConvertible
+
+extension Version: CustomStringConvertible, CustomDebugStringConvertible {
+
+    public var description: String {
+        formattedStringRepresentation(.full)
+    }
+
+    public var debugDescription: String {
+        "Version(major: \(major), minor: \(minor), patch: \(patch)"
+        + (prereleaseIdentifiers.isEmpty ? "" : ", preReleaseIdentifiers: \(prereleaseIdentifiers)")
+        + (metadataIdentifiers.isEmpty ? "" : ", metadataIdentifiers: \(metadataIdentifiers)")
+        + ")"
+    }
+}
+
+// MARK: - Formatted
 
 extension Version {
-    /// Returns the normalized string representation of the version.
-    /// Example: `"1.2.3-beta+001"`
-    public var stringRepresentation: String {
+
+    /// Version string formatting options for different display contexts.
+    public enum Format {
+        /// Short format: `"1.2.3"`
+        /// Contains only major, minor, and patch numbers.
+        case short
+
+        /// Full SemVer format: `"1.2.3-beta+001"`
+        /// Includes pre-release identifiers (`-`) and build metadata (`+`).
+        case full
+
+        /// Pretty format: `"v1.2.3-beta+001"`
+        /// Adds a leading `v` prefix, commonly used for Git tags and changelogs.
+        case pretty
+    }
+
+    /// Returns the version string in the specified format.
+    ///
+    /// - Parameters:
+    ///   - format: The desired output format.
+    /// - Returns: Formatted version string matching the specified style.
+    /// - Example:
+    ///   ```swift
+    ///   let version = Version(1, 2, 3, preRelease: ["beta"], metadata: ["001"])
+    ///   version.formattedStringRepresentation(.short)   // "1.2.3"
+    ///   version.formattedStringRepresentation(.full)    // "1.2.3-beta+001"
+    ///   version.formattedStringRepresentation(.pretty)  // "v1.2.3-beta+001"
+    ///   ```
+    public func formattedStringRepresentation(_ format: Format) -> String {
+        switch format {
+        case .short:
+            shortFormat()
+        case .full:
+            fullFormat()
+        case .pretty:
+            prettyFormat()
+        }
+    }
+
+    private func shortFormat() -> String {
         "\(major).\(minor).\(patch)"
+    }
+
+    private func fullFormat() -> String {
+        "\(major).\(minor).\(patch)"
+        + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
+        + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
+    }
+
+    private func prettyFormat() -> String {
+        "v\(major).\(minor).\(patch)"
         + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
         + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
     }

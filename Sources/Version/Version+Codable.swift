@@ -8,6 +8,6 @@ extension Version: Codable {
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(stringRepresentation)
+        try container.encode(formattedStringRepresentation(.full))
     }
 }
