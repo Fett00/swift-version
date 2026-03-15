@@ -159,7 +159,7 @@ v += .minor
 print(v) // "1.3.0"
 ```
 
-### Semantic Comparison Utilities
+### Semantic Comparison Utilities ✅
 
 Convenient methods to check compatibility or breaking changes:
 
@@ -168,7 +168,7 @@ v1.isCompatible(with: v2)
 v1.hasBreakingChange(comparedTo: v2)
 ```
 
-### Enhanced String Parsing
+### Enhanced String Parsing ✅
 
 Support for more flexible version formats:
 
@@ -184,7 +184,7 @@ v.addPrerelease("beta.1")
 v.addMetadata("exp.sha.5114f85")
 ```
 
-### Pretty Printing / Version Formatting
+### Pretty Printing / Version Formatting ✅
 
 Flexible formatting for logs or UI:
 
@@ -193,7 +193,7 @@ version.formatted(pretty: true) // "v1.2.3-beta+001"
 version.short                   // "1.2.3"
 ```
 
-### Environment & System Extensions
+### Environment & System Extensions ✅
 
 Convenient helpers to get app and system versions directly
 
