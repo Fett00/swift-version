@@ -170,4 +170,45 @@ struct BasicTests {
         #expect(Version(stringLiteral: "10.1.5-alpha.1").debugDescription == "Version(major: 10, minor: 1, patch: 5, preReleaseIdentifiers: [\"alpha\", \"1\"])")
         #expect(Version(stringLiteral: "10.1.5-alpha.1+m1").debugDescription == "Version(major: 10, minor: 1, patch: 5, preReleaseIdentifiers: [\"alpha\", \"1\"], metadataIdentifiers: [\"m1\"])")
     }
+    @Test func twoVersionDiffTest() async throws {
+        #expect(Version(major: 10, minor: 0, patch: 0)
+            .diff(Version(major: 10, minor: 0, patch: 0))
+            .description == "0.0.0"
+        )
+
+        #expect(Version(major: 11, minor: 0, patch: 0)
+            .diff(Version(major: 10, minor: 0, patch: 0))
+            .description == "1.0.0"
+        )
+
+        #expect(Version(major: 10, minor: 5, patch: 0)
+            .diff(Version(major: 10, minor: 1, patch: 0))
+            .description == "0.4.0"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2)
+            .diff(Version(major: 10, minor: 0, patch: 1))
+            .description == "0.0.1"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, prereleaseIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1))
+            .description == "0.0.1-1.alpha.early"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, prereleaseIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1, prereleaseIdentifiers: ["alpha", "1"]))
+            .description == "0.0.1-early"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, metadataIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1))
+            .description == "0.0.1+1.alpha.early"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, metadataIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1, metadataIdentifiers: ["alpha", "1"]))
+            .description == "0.0.1+early"
+        )
+    }
 }
