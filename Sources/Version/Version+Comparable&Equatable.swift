@@ -107,7 +107,7 @@ extension Version {
     /// - The returned version is not intended to be a valid semantic version for distribution;
     ///   it is a structural “diff” useful for inspection, comparison, or reporting.
     /// - Symmetric difference of identifiers does not preserve ordering and removes duplicates,
-    ///   since it is computed via sets.
+    ///   since it is computed via sets, but it sorted as is.
     ///
     /// - Parameter other: The version to compare against this version.
     /// - Returns: A `Version` whose fields describe how the two versions differ.
@@ -116,8 +116,8 @@ extension Version {
             major: UInt(abs(Int(self.major) - Int(other.major))),
             minor: UInt(abs(Int(self.minor) - Int(other.minor))),
             patch: UInt(abs(Int(self.patch) - Int(other.patch))),
-            prereleaseIdentifiers: Array(Set(self.prereleaseIdentifiers).symmetricDifference(other.prereleaseIdentifiers)),
-            metadataIdentifiers: Array(Set(self.metadataIdentifiers).symmetricDifference(other.metadataIdentifiers))
+            prereleaseIdentifiers: Array(Set(self.prereleaseIdentifiers).symmetricDifference(other.prereleaseIdentifiers)).sorted(),
+            metadataIdentifiers: Array(Set(self.metadataIdentifiers).symmetricDifference(other.metadataIdentifiers)).sorted()
         )
     }
 }
