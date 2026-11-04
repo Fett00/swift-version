@@ -113,8 +113,23 @@ extension Version {
 
     /// Version string formatting options for different display contexts.
     public enum Format {
-        /// Short format: `"1.2.3"`
-        /// Contains only major, minor, and patch numbers.
+
+        /// Compact format
+        ///
+        /// Example:
+        /// `"1.2.3 -> 1.2.3"`, `"1.2.0 -> 1.2"`, `"1.0.0" -> 1`
+        ///
+        /// Contains only major and minor with patch numbers if available.
+        /// Not includes pre-release identifiers (`-`) and build metadata (`+`).
+        case compact
+
+        /// Short format
+        ///
+        /// Example:
+        /// `"1.2.3 -> 1.2.3"`, `"1.2.0 -> 1.2"`, `"1.0.0" -> 1.0`
+        ///
+        /// Contains only major, minor, and patch numbers if available.
+        /// Not includes pre-release identifiers (`-`) and build metadata (`+`).
         case short
 
         /// Full SemVer format: `"1.2.3-beta+001"`
@@ -124,6 +139,42 @@ extension Version {
         /// Pretty format: `"v1.2.3-beta+001"`
         /// Adds a leading `v` prefix, commonly used for Git tags and changelogs.
         case pretty
+    }
+
+    private var compactFormat: String {
+        var components: [String] = ["\(major)"]
+
+        if minor != 0 || patch != 0 {
+            components.append("\(minor)")
+        }
+
+        if patch != 0 {
+            components.append("\(patch)")
+        }
+
+        return components.joined(separator: ".")
+    }
+
+    private var shortFormat: String {
+        var components: [String] = ["\(major)", "\(minor)"]
+
+        if patch != 0 {
+            components.append("\(patch)")
+        }
+
+        return components.joined(separator: ".")
+    }
+
+    private var fullFormat: String {
+        "\(major).\(minor).\(patch)"
+        + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
+        + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
+    }
+
+    private var prettyFormat: String {
+        "v\(major).\(minor).\(patch)"
+        + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
+        + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
     }
 
     /// Returns the version string in the specified format.
@@ -140,28 +191,14 @@ extension Version {
     ///   ```
     public func formattedStringRepresentation(_ format: Format) -> String {
         switch format {
+        case .compact:
+            compactFormat
         case .short:
-            shortFormat()
+            shortFormat
         case .full:
-            fullFormat()
+            fullFormat
         case .pretty:
-            prettyFormat()
+            prettyFormat
         }
-    }
-
-    private func shortFormat() -> String {
-        "\(major).\(minor).\(patch)"
-    }
-
-    private func fullFormat() -> String {
-        "\(major).\(minor).\(patch)"
-        + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
-        + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
-    }
-
-    private func prettyFormat() -> String {
-        "v\(major).\(minor).\(patch)"
-        + (prereleaseIdentifiers.isEmpty ? "" : "-\(prereleaseIdentifiers.joined(separator: "."))")
-        + (metadataIdentifiers.isEmpty ? "" : "+\(metadataIdentifiers.joined(separator: "."))")
     }
 }
