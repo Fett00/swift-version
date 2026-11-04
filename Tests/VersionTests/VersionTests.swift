@@ -99,6 +99,7 @@ struct BasicTests {
     }
 
     @Test func compareTwoVersionsTest() async throws {
+        // Greater
         #expect(Version(stringLiteral: "9.0.0") > Version(stringLiteral: "8.0.0"))
         #expect(Version(stringLiteral: "9.1.0") > Version(stringLiteral: "9.0.0"))
         #expect(Version(stringLiteral: "9.1.1") > Version(stringLiteral: "9.1.0"))
@@ -106,7 +107,10 @@ struct BasicTests {
         #expect(Version(stringLiteral: "10.1.5-beta") > Version(stringLiteral: "10.1.5-alpha"))
         #expect(Version(stringLiteral: "1.0.0") > Version(stringLiteral: "1.0.0-alpha"))
         #expect(Version(stringLiteral: "10.1.5-alpha.1") > Version(stringLiteral: "10.1.5-alpha"))
+        #expect(Version(stringLiteral: "1.0.0") > Version(stringLiteral: "1.0.0-rc.1"))
+        #expect(Version(stringLiteral: "1.0.0-beta") > Version(stringLiteral: "1.0.0-1"))
 
+        // Lower
         #expect(Version(stringLiteral: "1.0.0-alpha") < Version(stringLiteral: "1.0.0-alpha.1"))
         #expect(Version(stringLiteral: "1.0.0-alpha.1") < Version(stringLiteral: "1.0.0-alpha.beta"))
         #expect(Version(stringLiteral: "1.0.0-alpha.beta") < Version(stringLiteral: "1.0.0-beta"))
@@ -114,9 +118,18 @@ struct BasicTests {
         #expect(Version(stringLiteral: "1.0.0-beta.2") < Version(stringLiteral: "1.0.0-beta.11"))
         #expect(Version(stringLiteral: "1.0.0-beta.11") < Version(stringLiteral: "1.0.0-rc.1"))
         #expect(Version(stringLiteral: "1.0.0-rc.1") < Version(stringLiteral: "1.0.0"))
+
+        // Negative
+        #expect((Version(stringLiteral: "1.0.0-10") < Version(stringLiteral: "1.0.0-5")) == false)
+        #expect((Version(stringLiteral: "1.0.0-5") < Version(stringLiteral: "1.0.0-5")) == false)
+        #expect(Version(stringLiteral: "1.0.0-1") < Version(stringLiteral: "1.0.0-rc"))
+        #expect((Version(stringLiteral: "1.0.0-rc") < Version(stringLiteral: "1.0.0-1")) == false)
+        #expect((Version(stringLiteral: "1.0.0") < Version(stringLiteral: "1.0.0-rc")) == false)
+        #expect((Version(stringLiteral: "2.0.0") < Version(stringLiteral: "1.9.9")) == false)
     }
 
     @Test func equationTwoVersionsTest() async throws {
+        // Equal
         #expect(Version(stringLiteral: "10.0.0") == Version(stringLiteral: "10.0.0"))
         #expect(Version(stringLiteral: "10") == Version(stringLiteral: "10.0.0"))
         #expect(Version(stringLiteral: "10.1") == Version(stringLiteral: "10.1"))

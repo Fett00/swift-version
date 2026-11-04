@@ -24,10 +24,10 @@ extension Version: Equatable {
 extension Version: Comparable {
 
     public static func < (lhs: Version, rhs: Version) -> Bool {
-        lhs.major < rhs.major
-        || lhs.minor < rhs.minor
-        || lhs.patch < rhs.patch
-        || comparePrereleases(
+        if lhs.major != rhs.major { return lhs.major < rhs.major }
+        if lhs.minor != rhs.minor { return lhs.minor < rhs.minor }
+        if lhs.patch != rhs.patch { return lhs.patch < rhs.patch }
+        return comparePrereleases(
             lhs: lhs.prereleaseIdentifiers,
             rhs: rhs.prereleaseIdentifiers
         )
