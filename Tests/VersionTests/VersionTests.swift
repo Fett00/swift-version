@@ -21,22 +21,26 @@ struct BasicTests {
         #expect(Version(stringLiteral: "v10.1.5-alpha.1+m1").description == "10.1.5-alpha.1+m1")
 
         #expect(Version(stringLiteral: "0.0.0").description == "0.0.0")
+        #expect(Version(stringLiteral: "not a version").description == "0.0.0")
     }
 
     @Test func initFromStringDescriptionTest() async throws {
-        #expect(Version("10").description == "10.0.0")
-        #expect(Version("10.1").description == "10.1.0")
-        #expect(Version("0.1").description == "0.1.0")
-        #expect(Version("0.1.5").description == "0.1.5")
-        #expect(Version("0.0.5").description == "0.0.5")
-        #expect(Version("10.1.5").description == "10.1.5")
-        #expect(Version("10.1.5-alpha.1").description == "10.1.5-alpha.1")
-        #expect(Version("10.1.5-alpha.1+m1").description == "10.1.5-alpha.1+m1")
+        #expect(Version.init("10")?.description == "10.0.0")
+        #expect(Version.init("10.1")?.description == "10.1.0")
+        #expect(Version.init("0.1")?.description == "0.1.0")
+        #expect(Version.init("0.1.5")?.description == "0.1.5")
+        #expect(Version.init("0.0.5")?.description == "0.0.5")
+        #expect(Version.init("10.1.5")?.description == "10.1.5")
+        #expect(Version.init("10.1.5-alpha.1")?.description == "10.1.5-alpha.1")
+        #expect(Version.init("10.1.5-alpha.1+m1")?.description == "10.1.5-alpha.1+m1")
 
-        #expect(Version("v0.1.5").description == "0.1.5")
-        #expect(Version("v10.1.5").description == "10.1.5")
-        #expect(Version("v10.1.5-alpha.1").description == "10.1.5-alpha.1")
-        #expect(Version("v10.1.5-alpha.1+m1").description == "10.1.5-alpha.1+m1")
+        #expect(Version.init("v0.1.5")?.description == "0.1.5")
+        #expect(Version.init("v10.1.5")?.description == "10.1.5")
+        #expect(Version.init("v10.1.5-alpha.1")?.description == "10.1.5-alpha.1")
+        #expect(Version.init("v10.1.5-alpha.1+m1")?.description == "10.1.5-alpha.1+m1")
+
+        #expect(Version.init("not a version") == nil)
+        #expect(Version.init("") == nil)
     }
 
     @Test func initFromBasicLiteralTest() async throws {
@@ -95,6 +99,7 @@ struct BasicTests {
     }
 
     @Test func compareTwoVersionsTest() async throws {
+        // Greater
         #expect(Version(stringLiteral: "9.0.0") > Version(stringLiteral: "8.0.0"))
         #expect(Version(stringLiteral: "9.1.0") > Version(stringLiteral: "9.0.0"))
         #expect(Version(stringLiteral: "9.1.1") > Version(stringLiteral: "9.1.0"))
@@ -102,7 +107,10 @@ struct BasicTests {
         #expect(Version(stringLiteral: "10.1.5-beta") > Version(stringLiteral: "10.1.5-alpha"))
         #expect(Version(stringLiteral: "1.0.0") > Version(stringLiteral: "1.0.0-alpha"))
         #expect(Version(stringLiteral: "10.1.5-alpha.1") > Version(stringLiteral: "10.1.5-alpha"))
+        #expect(Version(stringLiteral: "1.0.0") > Version(stringLiteral: "1.0.0-rc.1"))
+        #expect(Version(stringLiteral: "1.0.0-beta") > Version(stringLiteral: "1.0.0-1"))
 
+        // Lower
         #expect(Version(stringLiteral: "1.0.0-alpha") < Version(stringLiteral: "1.0.0-alpha.1"))
         #expect(Version(stringLiteral: "1.0.0-alpha.1") < Version(stringLiteral: "1.0.0-alpha.beta"))
         #expect(Version(stringLiteral: "1.0.0-alpha.beta") < Version(stringLiteral: "1.0.0-beta"))
@@ -110,9 +118,18 @@ struct BasicTests {
         #expect(Version(stringLiteral: "1.0.0-beta.2") < Version(stringLiteral: "1.0.0-beta.11"))
         #expect(Version(stringLiteral: "1.0.0-beta.11") < Version(stringLiteral: "1.0.0-rc.1"))
         #expect(Version(stringLiteral: "1.0.0-rc.1") < Version(stringLiteral: "1.0.0"))
+
+        // Negative
+        #expect((Version(stringLiteral: "1.0.0-10") < Version(stringLiteral: "1.0.0-5")) == false)
+        #expect((Version(stringLiteral: "1.0.0-5") < Version(stringLiteral: "1.0.0-5")) == false)
+        #expect(Version(stringLiteral: "1.0.0-1") < Version(stringLiteral: "1.0.0-rc"))
+        #expect((Version(stringLiteral: "1.0.0-rc") < Version(stringLiteral: "1.0.0-1")) == false)
+        #expect((Version(stringLiteral: "1.0.0") < Version(stringLiteral: "1.0.0-rc")) == false)
+        #expect((Version(stringLiteral: "2.0.0") < Version(stringLiteral: "1.9.9")) == false)
     }
 
     @Test func equationTwoVersionsTest() async throws {
+        // Equal
         #expect(Version(stringLiteral: "10.0.0") == Version(stringLiteral: "10.0.0"))
         #expect(Version(stringLiteral: "10") == Version(stringLiteral: "10.0.0"))
         #expect(Version(stringLiteral: "10.1") == Version(stringLiteral: "10.1"))
@@ -120,14 +137,34 @@ struct BasicTests {
         #expect(Version(stringLiteral: "10.1.5") == Version(stringLiteral: "10.1.5"))
         #expect(Version(stringLiteral: "10.1.5-alpha") == Version(stringLiteral: "10.1.5-alpha"))
         #expect(Version(stringLiteral: "10.1.5-alpha.1") == Version(stringLiteral: "10.1.5-alpha.1"))
-    }
 
-    @Test func noValidInit() async throws {
-        let version: Version = "Hello"
-        #expect(version == Version(stringLiteral: "0.0.0"))
+        // Not equal
+        #expect(Version(stringLiteral: "10.1.5-alpha.1") != Version(stringLiteral: "10.1.5-alpha"))
     }
 
     @Test func formattedStringTest() async throws {
+
+        // Compact
+        #expect(Version(stringLiteral: "10").formattedStringRepresentation(.compact) == "10")
+        #expect(Version(stringLiteral: "10.1").formattedStringRepresentation(.compact) == "10.1")
+        #expect(Version(stringLiteral: "0.1").formattedStringRepresentation(.compact) == "0.1")
+        #expect(Version(stringLiteral: "0.1.5").formattedStringRepresentation(.compact) == "0.1.5")
+        #expect(Version(stringLiteral: "0.0.5").formattedStringRepresentation(.compact) == "0.0.5")
+        #expect(Version(stringLiteral: "10.1.5").formattedStringRepresentation(.compact) == "10.1.5")
+        #expect(Version(stringLiteral: "10.1.5-alpha.1").formattedStringRepresentation(.compact) == "10.1.5")
+        #expect(Version(stringLiteral: "10.1.5-alpha.1+m1").formattedStringRepresentation(.compact) == "10.1.5")
+
+        // Short
+        #expect(Version(stringLiteral: "10").formattedStringRepresentation(.short) == "10.0")
+        #expect(Version(stringLiteral: "10.1").formattedStringRepresentation(.short) == "10.1")
+        #expect(Version(stringLiteral: "0.1").formattedStringRepresentation(.short) == "0.1")
+        #expect(Version(stringLiteral: "0.1.5").formattedStringRepresentation(.short) == "0.1.5")
+        #expect(Version(stringLiteral: "0.0.5").formattedStringRepresentation(.short) == "0.0.5")
+        #expect(Version(stringLiteral: "10.1.5").formattedStringRepresentation(.short) == "10.1.5")
+        #expect(Version(stringLiteral: "10.1.5-alpha.1").formattedStringRepresentation(.short) == "10.1.5")
+        #expect(Version(stringLiteral: "10.1.5-alpha.1+m1").formattedStringRepresentation(.short) == "10.1.5")
+
+        // Full
         #expect(Version(stringLiteral: "10").formattedStringRepresentation(.full) == "10.0.0")
         #expect(Version(stringLiteral: "10.1").formattedStringRepresentation(.full) == "10.1.0")
         #expect(Version(stringLiteral: "0.1").formattedStringRepresentation(.full) == "0.1.0")
@@ -137,15 +174,7 @@ struct BasicTests {
         #expect(Version(stringLiteral: "10.1.5-alpha.1").formattedStringRepresentation(.full) == "10.1.5-alpha.1")
         #expect(Version(stringLiteral: "10.1.5-alpha.1+m1").formattedStringRepresentation(.full) == "10.1.5-alpha.1+m1")
 
-        #expect(Version(stringLiteral: "10").formattedStringRepresentation(.short) == "10.0.0")
-        #expect(Version(stringLiteral: "10.1").formattedStringRepresentation(.short) == "10.1.0")
-        #expect(Version(stringLiteral: "0.1").formattedStringRepresentation(.short) == "0.1.0")
-        #expect(Version(stringLiteral: "0.1.5").formattedStringRepresentation(.short) == "0.1.5")
-        #expect(Version(stringLiteral: "0.0.5").formattedStringRepresentation(.short) == "0.0.5")
-        #expect(Version(stringLiteral: "10.1.5").formattedStringRepresentation(.short) == "10.1.5")
-        #expect(Version(stringLiteral: "10.1.5-alpha.1").formattedStringRepresentation(.short) == "10.1.5")
-        #expect(Version(stringLiteral: "10.1.5-alpha.1+m1").formattedStringRepresentation(.short) == "10.1.5")
-
+        // Pretty
         #expect(Version(stringLiteral: "10").formattedStringRepresentation(.pretty) == "v10.0.0")
         #expect(Version(stringLiteral: "10.1").formattedStringRepresentation(.pretty) == "v10.1.0")
         #expect(Version(stringLiteral: "0.1").formattedStringRepresentation(.pretty) == "v0.1.0")
@@ -157,6 +186,7 @@ struct BasicTests {
     }
 
     @Test func descriptionStringTest() async throws {
+        // Description
         #expect(String(describing: Version(stringLiteral: "10")) == "10.0.0")
         #expect(String(describing: Version(stringLiteral: "10.1")) == "10.1.0")
         #expect(String(describing: Version(stringLiteral: "0.1")) == "0.1.0")
@@ -166,8 +196,111 @@ struct BasicTests {
         #expect(String(describing: Version(stringLiteral: "10.1.5-alpha.1")) == "10.1.5-alpha.1")
         #expect(String(describing: Version(stringLiteral: "10.1.5-alpha.1+m1")) == "10.1.5-alpha.1+m1")
 
+        // Debug description
         #expect(Version(stringLiteral: "10.1.5").debugDescription == "Version(major: 10, minor: 1, patch: 5)")
         #expect(Version(stringLiteral: "10.1.5-alpha.1").debugDescription == "Version(major: 10, minor: 1, patch: 5, preReleaseIdentifiers: [\"alpha\", \"1\"])")
         #expect(Version(stringLiteral: "10.1.5-alpha.1+m1").debugDescription == "Version(major: 10, minor: 1, patch: 5, preReleaseIdentifiers: [\"alpha\", \"1\"], metadataIdentifiers: [\"m1\"])")
+    }
+
+    @Test func twoVersionCompatibilityTest() async throws {
+        #expect(Version(major: 10, minor: 0, patch: 0)
+            .isCompatible(Version(major: 10, minor: 0, patch: 0))
+        )
+        #expect(Version(major: 10, minor: 1, patch: 0)
+            .isCompatible(Version(major: 10, minor: 0, patch: 0))
+        )
+        #expect(Version(major: 10, minor: 0, patch: 5)
+            .isCompatible(Version(major: 10, minor: 0, patch: 0))
+        )
+        #expect(Version(major: 11, minor: 0, patch: 0)
+            .isCompatible(Version(major: 10, minor: 0, patch: 0)) == false
+        )
+        #expect(Version(major: 10, minor: 0, patch: 0)
+            .isCompatible(Version(major: 11, minor: 0, patch: 0)) == false
+        )
+        #expect(Version(major: 11, minor: 5, patch: 0)
+            .isCompatible(Version(major: 10, minor: 0, patch: 0)) == false
+        )
+        #expect(Version(major: 11, minor: 0, patch: 1)
+            .isCompatible(Version(major: 10, minor: 0, patch: 0)) == false
+        )
+        #expect(Version(major: 11, minor: 5, patch: 1)
+            .isCompatible(Version(major: 10, minor: 0, patch: 0)) == false
+        )
+    }
+
+    @Test func twoVersionHasBrakingChangesTest() async throws {
+        #expect(Version(major: 10, minor: 0, patch: 0)
+            .hasBreakingChanges(Version(major: 10, minor: 0, patch: 0)) == false
+        )
+        #expect(Version(major: 10, minor: 1, patch: 0)
+            .hasBreakingChanges(Version(major: 10, minor: 0, patch: 0)) == false
+        )
+        #expect(Version(major: 10, minor: 0, patch: 5)
+            .hasBreakingChanges(Version(major: 10, minor: 0, patch: 0)) == false
+        )
+        #expect(Version(major: 11, minor: 0, patch: 0)
+            .hasBreakingChanges(Version(major: 10, minor: 0, patch: 0))
+        )
+        #expect(Version(major: 10, minor: 0, patch: 0)
+            .hasBreakingChanges(Version(major: 11, minor: 0, patch: 0))
+        )
+        #expect(Version(major: 11, minor: 5, patch: 0)
+            .hasBreakingChanges(Version(major: 10, minor: 0, patch: 0))
+        )
+        #expect(Version(major: 11, minor: 0, patch: 1)
+            .hasBreakingChanges(Version(major: 10, minor: 0, patch: 0))
+        )
+        #expect(Version(major: 11, minor: 5, patch: 1)
+            .hasBreakingChanges(Version(major: 10, minor: 0, patch: 0))
+        )
+    }
+
+    @Test func twoVersionDiffTest() async throws {
+        #expect(Version(major: 10, minor: 0, patch: 0)
+            .diff(Version(major: 10, minor: 0, patch: 0))
+            .description == "0.0.0"
+        )
+
+        #expect(Version(major: 11, minor: 0, patch: 0)
+            .diff(Version(major: 10, minor: 0, patch: 0))
+            .description == "1.0.0"
+        )
+
+        #expect(Version(major: 10, minor: 5, patch: 0)
+            .diff(Version(major: 10, minor: 1, patch: 0))
+            .description == "0.4.0"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2)
+            .diff(Version(major: 10, minor: 0, patch: 1))
+            .description == "0.0.1"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, prereleaseIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1))
+            .description == "0.0.1-1.alpha.early"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, prereleaseIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1, prereleaseIdentifiers: ["alpha", "1"]))
+            .description == "0.0.1-early"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, metadataIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1))
+            .description == "0.0.1+1.alpha.early"
+        )
+
+        #expect(Version(major: 10, minor: 0, patch: 2, metadataIdentifiers: ["alpha", "1", "early"])
+            .diff(Version(major: 10, minor: 0, patch: 1, metadataIdentifiers: ["alpha", "1"]))
+            .description == "0.0.1+early"
+        )
+    }
+
+    @Test func testFoundation() async throws {
+        #expect(Bundle.main.version?.formattedStringRepresentation(.short) == Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String)
+        #expect(Bundle.main.minimalSystemVersion?.formattedStringRepresentation(.short) == Bundle.main.infoDictionary?["CFBundleMinimumOSVersion"] as? String)
+
     }
 }
